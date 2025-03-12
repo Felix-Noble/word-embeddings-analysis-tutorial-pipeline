@@ -1,5 +1,7 @@
 # Word-Embeddings
-Creations, dimension reduction, and clustering of word embeddings for Music evoked autobiographical memories 
+1. Word embeddings
+2. Dim reduction
+3. Clustering
 
 Music evokes autobiographical memories pipeline doc.
 Dependencies: numpy, pandas, umap, sentence-transformers (SBERT), sklearn (sci-kit learn), skfuzzy
