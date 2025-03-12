@@ -4,15 +4,15 @@ Creations, dimension reduction, and clustering of word embeddings for Music evok
 Music evokes autobiographical memories pipeline doc.
 Dependencies: numpy, pandas, umap, sentence-transformers (SBERT), sklearn (sci-kit learn), skfuzzy
 
-To download dependencies:
+# To download dependencies:
 
-pip install pandas
+pip install pandas \n
 pip install -U sentence-transformers
 pip install -U scikit-learn (installs numpy)
 pip install -U scikit-fuzzy
 pip install umap==0.5.2
 
-Mpipe:
+# Mpipe:
 The Mpipe object can be instantiated as follows:
   Pipe = Mpipe(root, data_file, output, custom_fname , step_attributes, safe_run, verbose)
   
