@@ -8,10 +8,9 @@ Dependencies: numpy, pandas, umap, sentence-transformers (SBERT), sklearn (sci-k
 
 # To download dependencies:
 
-'''bash
-pip install pandas, 
-pip install numpy,
-pip install -U sentence-transformers, 
+-pip install pandas, 
+-pip install numpy,
+-pip install -U sentence-transformers, 
 pip install -U scikit-learn, 
 pip install -U scikit-fuzzy, 
 pip install umap==0.5.2
