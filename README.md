@@ -6,6 +6,7 @@ Dependencies: numpy, pandas, umap, sentence-transformers (SBERT), sklearn (sci-k
 
 # To download dependencies:
 
+'''bash
 pip install pandas, 
 pip install numpy,
 pip install -U sentence-transformers, 
