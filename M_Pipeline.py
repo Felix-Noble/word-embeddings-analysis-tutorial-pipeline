@@ -25,7 +25,6 @@ choice : clustering method
 out: cluster labels     shape = (observation, label)
 
 """
-
 import warnings, os
 import numpy as np
 import pandas as pd
@@ -191,23 +190,39 @@ class M_cluster(base):
         # return model labels as df (n_observations, labels) note: only has 1 column
         return pd.DataFrame(model.labels_, columns=["labels"])
     
-    def FUZZYCMEANS(self, data, params=None, score=False):
+    def FUZZYCMEANS(self, data, params=None, score=False, centroids=False):
         self.stepadd = "-FUZZYCMEANS"
         """ FUZZY C Means (skfuzzy)
         IN: 2D array (n_observations, n_features)
         OUT: cluster membership (proportions) shape = (memberships, n_observations), score (float)
         INFO: https://scikit-fuzzy.github.io/scikit-fuzzy/auto_examples/plot_cmeans.html#example-plot-cmeans-py
-        
         """
+        data = data.to_numpy().T # transpose matrix (skfuzzy expexts n_feat, n_obvs)
+
         if params is not None:
             self.step_params = params
-        
-        data = data.to_numpy().T # transpose matrix (skfuzzy expexts n_feat, n_obvs)
-        cntr, memb, _, _, _, _, fpc = fuzz.cluster.cmeans(
-        data, c=self.step_params["n_clusters"], m=2, error=self.step_params["error"], maxiter=self.step_params["maxiter"], init=self.step_params["init"])
+
+        if self.step_params["random_state"] == None:
+            cntr, memb, _, _, _, _, fpc = fuzz.cluster.cmeans(self.scale(data), 
+                                                          c=self.step_params["n_clusters"],
+                                                          m=2, error=self.step_params["error"], 
+                                                          maxiter=self.step_params["maxiter"], 
+                                                          init=None)
+        else:
+            np.random.seed(self.step_params["random_state"])
+            centroids_init = np.random.rand(self.step_params["n_clusters"], data.shape[1])  # Random initialization of centroids
+
+            cntr, memb, _, _, _, _, fpc = fuzz.cluster.cmeans(self.scale(data), 
+                                                            c=self.step_params["n_clusters"],
+                                                            m=2, error=self.step_params["error"], 
+                                                            maxiter=self.step_params["maxiter"], 
+                                                            init=centroids_init)
+        out = [memb.T]
         if score:
-            return memb.T, fpc
-        return memb.T
+            out.append(fpc)
+        if centroids:
+            out.append(cntr)
+        return out
 
 class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
     def __init__(self, root=None, data_file=None, output=None, figures="figures\\", 
@@ -216,7 +231,7 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
         M_embed.__init__(self)
         M_dim_reduce.__init__(self)
         M_cluster.__init__(self)
-
+        exit = False
         # check and set list of attribute dictionaries for each function in the pipeline
         if type(step_attributes) != list:
             raise TypeError(f"expected list with 1+ dicts, got {type(step_attributes)}")
@@ -257,7 +272,8 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
         self.data_file = os.path.join(root, data_file)
         if output is None:
             raise ValueError("data folder must be specified")            
-        self.output = os.path.join(root, output)
+        
+        self.output = os.path.join(f"{root}\\{output}")
 
         if figures is None:
             warnings.warn("no figures folder specified, figs will be saved to root folder", UserWarning)
@@ -274,10 +290,12 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
             else:
                 no_paths.append(path)
         if len(no_paths) != 0:
-            for x in no_paths:
-                print(x)
+            print(no_paths)
+            exit = True
+        if exit:
             raise ValueError(f"file not found error for above paths")
         del no_paths
+        
         if not os.path.exists(self.output):
             print(f"\033[31m Output folder does not exist, creating directory \033[0m{self.output}")
             os.mkdir(self.output)
@@ -340,3 +358,7 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
             self.save(data_obj)
         return data_obj
 
+
+if __name__ == "__main__":
+    root = "D:\\Dropbox\\2. Cognitive science\\Music evoked autobiographical memories\\"
+    pipe = Mpipe(root, r"data\SBERT\SBERT-L6-v2_embed.csv", "\\data\\SBERT\\")
