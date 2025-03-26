@@ -329,7 +329,7 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
         fname = f"{self.custom_fname}{self.steps_taken}.csv"
         path = os.path.join(self.output, fname)
 
-        obj.to_csv(path)
+        obj.to_csv(path, index=False)
         if self.verbose:
             print(f"DataFrame of shape {obj.shape} saved to {self.root[0]}: ... \\{os.path.basename(self.output)}\\{fname}")
         self.last_out = path
