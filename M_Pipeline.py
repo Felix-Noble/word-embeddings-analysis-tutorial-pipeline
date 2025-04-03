@@ -274,7 +274,7 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
             raise ValueError("data folder must be specified")            
         
         self.output = os.path.join(self.root, output)
-
+        self.output = os.path.normpath(self.output)
         if figures is None:
             warnings.warn("no figures folder specified, figs will be saved to root folder", UserWarning)
             temp_join = ""
