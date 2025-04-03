@@ -225,7 +225,7 @@ class M_cluster(base):
         return out
 
 class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
-    def __init__(self, root=None, data_file=None, output=None, figures="figures\\", 
+    def __init__(self, root=None, data_file=None, output=None, figures="figures", 
                  custom_fname=None, step_attributes=[],safe_run=True, verbose=True):
         base.__init__(self, safe_run=safe_run)
         M_embed.__init__(self)
@@ -273,7 +273,7 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
         if output is None:
             raise ValueError("data folder must be specified")            
         
-        self.output = os.path.join(f"{root}\\{output}")
+        self.output = os.path.join(self.root, output)
 
         if figures is None:
             warnings.warn("no figures folder specified, figs will be saved to root folder", UserWarning)
