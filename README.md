@@ -1,96 +1,78 @@
-# Word-Embeddings
-1. Word embeddings
-2. Dim reduction
-3. Clustering
+Contact: Felix Noble - felix.noble@live.co.uk | Repositories: https://github.com/Felix-Noble | Project Updates: https://www.linkedin.com/in/felix-noble-6901b117b/
+# Textual Data Analysis Pipeline
+This project provides an accessible, high-level tool for analyzing textual data, ideal for researchers and students new to Python. It centers around a flexible pipeline (M_Pipeline.py) for analyzing written natural language (NL) through three main steps:
 
-Music evokes autobiographical memories pipeline doc.
-Dependencies: numpy, pandas, umap, sentence-transformers (SBERT), sklearn (sci-kit learn), skfuzzy
+Embedding: Converts text into numerical vectors using models like Sentence-BERT (SBERT).
 
-# To download dependencies:
+Dimensionality Reduction: Uses techniques like UMAP to simplify the data.Clustering: Groups data using algorithms such as K-Means and Fuzzy C-Means.
 
--pip install pandas, 
--pip install numpy,
--pip install -U sentence-transformers, 
-pip install -U scikit-learn, 
-pip install -U scikit-fuzzy, 
-pip install umap==0.5.2
+The Jupyter notebooks (Analysis.ipynb and Classification.ipynb) demonstrate how to use the pipeline and build predictive models (e.g., Random Forest).
 
-## Mpipe:
-The Mpipe object can be instantiated as follows:
-  Pipe = Mpipe(root, data_file, output, custom_fname , step_attributes, safe_run, verbose)
-  
-If the given output directory does not exist, a new one will be created with the name given. 
+# Getting Started
 
-# Arguments
-  root = path (string) to root working directory folder
-  data_file = path (string) to file containing ONLY data to be analysed (.csv)
-  output = name (string) of folder (in root dir) for pipeline outputs (defaults to root dir)
-  custom_fname = custom filename (string) beginning for saved outputs (default = “”)
+PrerequisitesBefore you begin, ensure you have Python installed. It's highly recommended to work within a virtual environment to manage dependencies. You can find a helpful tutorial on creating virtual environments here.InstallationClone the repository:git clone [https://github.com/your_username/your_project.git](https://github.com/your_username/your_project.git)
 
-# Optional (recommended):
-  safe_run = if true check pipeline step function has expected attributes before assigning them (default=True)
-  verbose = if true pipeline object will announce each step and the type/shape of data being passed through it. (default = True)
+# Install the required packages:
+pip install pandas numpy umap-learn sentence-transformers scikit-learn scikit-fuzzy matplotlib
 
-# Optional:
-  step_attributes = list of dictionaries containing parameters (arguments) to pass to step functions (default = [], empty list)
-Note. Only needed if execute function will be used
+Ensure your data files are placed in the appropriate data/ subdirectory.
 
-# Execute:
-  execute(pipe):
-        Runs pipeline objects and assigns step_attributes at the same index to 	  their functions
--	saves the output of every step taken, with a filename that shows 		  which steps were taken (and which order)
--	Does not check whether transformations are repeated (make sure to check which steps are before others)
-            
-        
-# Embedding:
-SBERT(text_data, params=None):
-        self.stepadd="-SBERT"
-        Sentence Bert Sentence Transformer encoding 
-        IN: dataframe containing text data 
+# Usage
+The core of this project is the M_Pipeline object, which facilitates a step-by-step text analysis workflow. Below is a basic example of how to use it.
 
--	will vertically concatenate columns if cols > 1 and drops ALL rows containing NA
+~~~
+import sys
+import pandas as pd
+from M_Pipeline import Mpipe
 
-        OUT: data frame of shape (n_observations, n_features)
-        
-info: https://sbert.net/docs/package_reference/sentence_transformer/SentenceTransformer.html
-  	"""
+# Set up project root and data paths
+root = "path/to/root/"
 
-OPENAI : returns Open AI GPT word embeddings 
+data_file = "[root]/data/SBERT/playlists/spotify_descriptions AND memories all-MiniLM-L6.csv"
 
-## Dimensionality reduction:
+output_dir = "[root]/data/SBERT/playlists AND memories/"
 
-# UMAP_reduce(data, params=None):
-        self.stepadd="-UMAP"
-         UMAP dimentionality reduction 
-            IN: dataframe containing only values to be reduced 
--	Scales data before transforming (sklearn - StandardScaler)
-OUT: umap dimensional values (n_observations, n_features)
-            
-info: 
-https://umap-learn.readthedocs.io/en/latest/parameters.html
+# Initialize the pipeline with existing embeddings
+pipe = Mpipe(root=root, data_file=data_file, output=output_dir)
 
-      
-PCA : returns n principle components 
+# Define UMAP parameters and run dimensionality reduction
+umap_args = {"n_components": 2, "n_neighbors": 15, "random_state": 2025}
+u
+map_features = pipe.UMAP_reduce(pipe.data, umap_args)
 
-## Clustering:
-# KMEANS(data, params=None):
-        self.stepadd="-KMEANS"
-         KMEANS clustering algorithm
-            IN: pandas dataframe containing data to be clustered     
--	Scales data before transforming (sklearn - StandardScaler)
-        	OUT:cluster labels (n_observations, labels)
-info: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html
+# Define K-Means parameters and run clustering
+km_args = {"n_clusters": 7, "random_state": 2025, "n_init": 100}
 
-       
-# FUZZYCMEANS(data, params=None, score = False):
-        """ FUZZY C Means (skfuzzy)
-        IN: 2D array (n_observations, n_features)
-        OUT: cluster membership (proportions) shape = (memberships, n_observations), score (float)
-        INFO: https://scikit-fuzzy.github.io/scikit-fuzzy/auto_examples/plot_cmeans.html#example-plot-cmeans-py
-        """
-Args:
-  Params : arguments to pass to fuzzy c means cluster function 
-  Score = (True/False). Returns score of clustering if true.
+kmeans_labels = pipe.KMEANS(umap_features, km_args)
+~~~
 
+The results at each step are automatically saved to the output directory.
 
+# Exploring with Jupyter Notebooks
+For more detailed examples and to learn how to apply these statistical methods, please refer to the provided Jupyter Notebooks:
 
+Embed.ipynb: 
+This notebook demonstrates how to generate text embeddings from your raw data.
+
+Analysis.ipynb: Learn how to perform dimensionality reduction and clustering on your embeddings to uncover patterns and insights.
+
+Classification.ipynb: This notebook guides you through building and evaluating a predictive model based on the processed features.
+
+Default Arguments.ipynb: Here, you can explore the default parameters for the various methods and understand their impact on the results.
+
+# Roadmap
+[x] Embedding Module: Implemented SBERT for text embeddings.
+
+[x] Dimensionality Reduction Module: Implemented UMAP.
+
+[x] Clustering Module: Implemented K-Means and Fuzzy C-Means.
+
+[x] Analysis & Classification: Created notebooks for pipeline execution, visualization, and building predictive models.
+
+[ ] Implement additional embedding models (e.g., OpenAI, Llama).
+
+[ ] Implement other dimensionality reduction techniques (e.g., PCA, t-SNE).
+
+Users are encouraged to contribute by implementing additional analysis steps, for embedding or other techniques. As long as the output data maintains its shape of (observations, features), a wide array of other analytical techniques can be readily integrated. Your contributions are welcome and help to expand the capabilities of this tool.
+
+License Distributed under the MIT LICENSE. See LICENSE.txt for more information.
