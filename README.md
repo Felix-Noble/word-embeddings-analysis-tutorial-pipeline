@@ -10,7 +10,7 @@ The Jupyter notebooks (Analysis.ipynb and Classification.ipynb) demonstrate how 
 
 # Getting Started
 
-PrerequisitesBefore you begin, ensure you have Python installed. It's highly recommended to work within a virtual environment to manage dependencies. You can find a helpful tutorial on creating virtual environments here.InstallationClone the repository:git clone [https://github.com/your_username/your_project.git](https://github.com/your_username/your_project.git)
+PrerequisitesBefore you begin, ensure you have Python installed. It's highly recommended to work within a virtual environment to manage dependencies. You can find a helpful tutorial on creating virtual environments here: https://docs.python.org/3/library/venv.html.
 
 # Install the required packages:
 pip install pandas numpy umap-learn sentence-transformers scikit-learn scikit-fuzzy matplotlib
