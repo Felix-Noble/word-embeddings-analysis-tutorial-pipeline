@@ -28,25 +28,38 @@ from M_Pipeline import Mpipe
 # Set up project root and data paths
 root = "path/to/root/"
 
-data_file = "[root]/data/SBERT/playlists/spotify_descriptions AND memories all-MiniLM-L6.csv"
+# example file containing text data
+descriptions_cleaned = "[root]/data/text_data.csv"
+# example file containing SBERT embeddings
+embed_data_file = "[root]/data/SBERT/embeddings_L6_v2.csv"
 
-output_dir = "[root]/data/SBERT/playlists AND memories/"
+output_dir = "[root]/data/SBERT/.../"
 
 # Initialize the pipeline with existing embeddings
 pipe = Mpipe(root=root, data_file=data_file, output=output_dir)
 
-# Define UMAP parameters and run dimensionality reduction
-umap_args = {"n_components": 2, "n_neighbors": 15, "random_state": 2025}
-u
-map_features = pipe.UMAP_reduce(pipe.data, umap_args)
+## Define SBERT parameters and extract word embeddings
+sbert_args = {"model_name":"all-MiniLM-L6-v2"}
 
-# Define K-Means parameters and run clustering
+#  in: DataFrame/List with only text data
+embeddings = pipe.SBERT(pipe.data, sbert_args)
+#  out: DataFrame with shape (n_observations, n_features)
+
+## Define UMAP parameters and run dimensionality reduction
+umap_args = {"n_components": 2, "n_neighbors": 15, "random_state": 2025}
+
+#  in: DataFrame of shape (n_observations, n_features)
+umap_features = pipe.UMAP_reduce(embeddings, umap_args)
+#  out: DataFrame of shape (n_observations, n_features)
+
+## Define K-Means parameters and run clustering
 km_args = {"n_clusters": 7, "random_state": 2025, "n_init": 100}
 
+#  in: DataFrame of shape (n_observations, n_features)
 kmeans_labels = pipe.KMEANS(umap_features, km_args)
-~~~
+#  out: DataFrame of shape (n_observations, 1) - one label for each observation clustered
 
-The results at each step are automatically saved to the output directory.
+~~~
 
 # Exploring with Jupyter Notebooks
 For more detailed examples and to learn how to apply these statistical methods, please refer to the provided Jupyter Notebooks:
