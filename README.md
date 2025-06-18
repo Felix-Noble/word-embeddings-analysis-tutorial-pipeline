@@ -126,9 +126,13 @@ Default Arguments.ipynb: Here, you can explore the default parameters for the va
 
 [x] Analysis & Classification: Created notebooks for pipeline execution, visualization, and building predictive models.
 
+[ ] Refractor project components into single files performing indiviudal tasks (i.e embed.py, feature_extract.py, cluster.py, ...)
+
 [ ] Implement additional embedding models (e.g., OpenAI, Llama).
 
 [ ] Implement other dimensionality reduction techniques (e.g., PCA, t-SNE).
+
+[ ] Implement other clustering techniques (e.g., DBSCAN).
 
 Users are encouraged to contribute by implementing additional analysis steps, for embedding or other techniques. As long as the output data maintains its shape of (observations, features), a wide array of other analytical techniques can be readily integrated. Your contributions are welcome and help to expand the capabilities of this tool.
 
