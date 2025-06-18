@@ -4,7 +4,9 @@ This project provides an accessible, high-level tool for analyzing textual data,
 
 Embedding: Converts text into numerical vectors using models like Sentence-BERT (SBERT).
 
-Dimensionality Reduction: Uses techniques like UMAP to simplify the data.Clustering: Groups data using algorithms such as K-Means and Fuzzy C-Means.
+Dimensionality Reduction: Uses techniques like UMAP to simplify the data.
+
+Clustering: Groups data using algorithms such as K-Means and Fuzzy C-Means.
 
 The Jupyter notebooks (Analysis.ipynb and Classification.ipynb) demonstrate how to use the pipeline and build predictive models (e.g., Random Forest).
 
@@ -58,9 +60,12 @@ embeddings = pipe.SBERT(pipe.data, sbert_args)
 #    in: DataFrame/List with only text data
 #    out: DataFrame with shape (n_observations, n_features)
 ~~~
+
 # Define UMAP parameters and run dimensionality reduction
 Familiarise yourself with UMAP input arguments, information linked here
+
 3rd Party (reccomended): https://pair-code.github.io/understanding-umap/
+
 Official: https://umap-learn.readthedocs.io/en/latest/parameters.html#n-neighbors
 ~~~
 umap_args = {"n_components": 2, "n_neighbors": 15, "random_state": RANDOM}
@@ -72,7 +77,8 @@ umap_features = pipe.UMAP_reduce(embeddings, umap_args)
 
 # Define K-Means parameters and run clustering
 Select number of clusters (see Analysis for sillhetee score analysis of KMEANS solutions)
-Note: the order of these argument dictionaries (e.g. km_args) does not affect result. 
+
+Note: the order of these argument dictionaries (e.g. km_args) does not affect the result. 
 ~~~
 km_args = {"n_clusters": 7, "random_state": RANDOM, "n_init": 100}
 kmeans_labels = pipe.KMEANS(umap_features, km_args)
@@ -84,17 +90,20 @@ kmeans_labels = pipe.KMEANS(umap_features, km_args)
 
 # Saving data
 All methods in this pipeline return pandas DataFrames (n_observations, n_features) allowing for easy saving at any stage. 
+
 Option 1:
-Automatically saves file in chosen output directory
+
+Automatically saves file in chosen output directory (automatically converts to pd.DataFrame and saved with index=False)
 ~~~
 file_name = "text_data cleaned1 all-MiniLM-L6"
 pipe.save(embed, file_name)
 ~~~
 Option 2:
+
 Utilise pandas saving methods direclty
 ~~~
 file_name = "text_data cleaned1 all-MiniLM-L6.csv"
-embed.to_csv(os.path.join(pipe.output, file_name))
+embed.to_csv(os.path.join(pipe.output, file_name), index=False)
 ~~~
 
 # Exploring with Jupyter Notebooks
