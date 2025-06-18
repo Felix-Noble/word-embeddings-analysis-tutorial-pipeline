@@ -28,6 +28,7 @@ out: cluster labels     shape = (observation, label)
 import warnings, os
 import numpy as np
 import pandas as pd
+from pathlib import Path
 import umap
 from sentence_transformers import SentenceTransformer
 from sklearn.decomposition import PCA
@@ -43,27 +44,30 @@ class base:
             raise TypeError(f"safe_run argument must be bool type, {type(safe_run)} given")
 
         self.safe_run=safe_run
+        self.warning_format = "\n----- WARNING -----\n{}\n--------------"
         return 
     
-    def set_attributes(self, attrs):
-        if type(attrs) != dict:
-            raise TypeError(f"expected dictionary, got {type(attrs)}")
+    # def set_attributes(self, attrs):
+    #     if type(attrs) != dict:
+    #         raise TypeError(f"expected dictionary, got {type(attrs)}")
 
-        for key, value in attrs.items():
-            if key == "step":
-                continue
-            #if hasattr(self, key):  # Check if the attribute exists on the object
-            setattr(self, key, value)  # Set the attribute value
-            #print(key,value)
+    #     for key, value in attrs.items():
+    #         if key == "step":
+    #             continue
+    #         #if hasattr(self, key):  # Check if the attribute exists on the object
+    #         setattr(self, key, value)  # Set the attribute value
+    #         #print(key,value)
     
+
     def scale(self, data):
         return StandardScaler().fit_transform(data)
+    
     def descr_data(self, object):
         print(f"-Type: {type(object)}\n-Shape:{object.shape}\n- -Obervations: {object.shape[0]}\n- -Features/measures: {object.shape[1]}\n")
+    
     def missing_attr_list(self, length):
         return [x for x in range(1, length)]
-    def get_file_ext(self, path):
-        return path[path.rfind("."):]        
+    
     def check_attr(self, obj, attrs):
         #obj = obj
         for key in attrs.keys():
@@ -72,17 +76,47 @@ class base:
             
     def load(self, path):
         if os.path.exists(path):
-            ext = self.get_file_ext(path)
+            _, ext =  os.path.splitext(path)
             if ext in self.compatible_ftypes.keys():
                 data = self.compatible_ftypes[ext](path)
                 return data
-                
-            warnings.WarningMessage(f"Incompatible file extension. Expected {self.compatible_ftypes.keys()}, got {ext}")
-        warnings.WarningMessage(f"file path not found : {path}")
+            msg = f"[{ext}] is Incompatible file extension. Expected one of [{self.compatible_ftypes.keys()}],  "
+            warnings.warn(self.warning_format.format(msg), 
+                UserWarning)
+        msg = f"file path not found : {path}"
+        warnings.warn(
+            self.warning_format.format(msg),
+            UserWarning)
         cont = input("Quit session? (Y)")
         if cont in ["Y", "y"]:
             quit()
+    
+    def DFConvert(self, obj):
+        # Attempts conversion to pandas DataFrame if object is not a pd.DataFrame
+        if not isinstance(obj, pd.DataFrame):
+            
+            msg = (
+                    "\n----- WARNING -----\n"
+                    f"[pandas.DataFrame] expected, got [{type(obj).__name__}].\n"
+                    "Attempting conversion to pd.DataFrame.\n"
+                    
+                )
 
+            try:
+                temp = pd.DataFrame(obj)
+                msg += "Conversion Successful\n---"
+                warnings.warn(msg, UserWarning)
+            
+                return temp
+            except:
+                with Exception as e:
+                    msg += f"Conversion of {obj.__name__} to pd.DataFrame failed: {e}\n---"
+                    warnings.warn(msg, UserWarning)
+
+                    return False
+        else:
+            return obj
+        
 class M_embed(base):
     def __init__(self):
         return
@@ -95,15 +129,21 @@ class M_embed(base):
         info: https://sbert.net/docs/package_reference/sentence_transformer/SentenceTransformer.html
 
         """
+        text_data = self.DFConvert(text_data) # convert to df if not already 
+        if text_data.shape[0] <1:
+            raise ValueError("No text data passed as input")
 
         text_data = text_data.dropna() # ensure no missing values (sbert rejects)
-
+        
+        if text_data.shape[0] <1:
+            raise ValueError("Input data reduced when NA's dropped (all rows have at least one NA, manually clean data)")
+        
         #model = SentenceTransformer()
         #model.__dict__.update(self.step_params)
 
         text_in = [] # initialise list for input text
-        for col in text_data.columns:
-            text_in += text_data[col].tolist() # concatenate each column in input df onto the text input list
+        for col in range(text_data.shape[1]):
+            text_in += text_data.iloc[:,col].tolist() # concatenate each column in input df onto the text input list
         for (i,x) in enumerate(text_in): # check that all values in input list are string
             if type(x) != str:
                 raise TypeError(f"dataframe passed to SBERT function contains non-string values ({text_in[i]} : {type(x)})")
@@ -111,7 +151,6 @@ class M_embed(base):
 
         if params is not None:
             self.step_params = params
-
         model = SentenceTransformer(model_name_or_path=self.step_params["model_name"])# initialist SBERT model
         # if self.safe_run: # make sure model has attributes assigned to it (from the step attributes list)
         #     self.check_attr(model, self.step_params)
@@ -119,7 +158,8 @@ class M_embed(base):
 
         embeddings = model.encode(text_in, convert_to_numpy=True) # transform text to embeddings 
         # return df containing embeddings (n_observations, n_features)
-        
+        if embeddings.shape[0]<1:
+            raise ValueError(f"No embeddings returned, ensure data integrity")
         return pd.DataFrame(embeddings,
                             columns=[f"Feature_{x}" for x in range(1,embeddings.shape[1]+1)]) 
     
@@ -225,7 +265,7 @@ class M_cluster(base):
         return out
 
 class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
-    def __init__(self, root=None, data_file=None, output=None, figures="figures", 
+    def __init__(self, root=None, data_file=None, output=None, 
                  custom_fname=None, step_attributes=[],safe_run=True, verbose=True):
         base.__init__(self, safe_run=safe_run)
         M_embed.__init__(self)
@@ -252,13 +292,13 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
             self.custom_fname = ""
 
         false_vals = []
-        for val in (root, data_file, output, figures):
+        for val in (root, data_file, output):
             if type(val) != str:
                 false_vals.append(val)
         if len(false_vals) != 0:
             print("False values:")
             for x in false_vals:
-                print(x, " :", type(x))
+                print(x.__name__, " :", type(x))
             raise TypeError(f"init vals given incorrect type (Must be string)")
         del false_vals
         if type(verbose) != bool:
@@ -266,25 +306,17 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
         
         if root is None:
             raise ValueError("root folder must be specified")
-        self.root = root
+        self.root = Path(root)
         if data_file is None:
             raise ValueError("data folder must be specified")
-        self.data_file = os.path.join(root, data_file)
+        self.data_file = self.root / data_file
         if output is None:
             raise ValueError("data folder must be specified")            
         
-        self.output = os.path.join(self.root, output)
-        self.output = os.path.normpath(self.output)
-        if figures is None:
-            warnings.warn("no figures folder specified, figs will be saved to root folder", UserWarning)
-            temp_join = ""
-        else:
-            temp_join = figures
-        self.figures = os.path.join(root, temp_join)
-
+        self.output = self.root / output
         # Check validity of file structure
         no_paths = []
-        for path in (self.root, self.data_file, self.figures):
+        for path in (self.root, self.data_file):
             if os.path.exists(path):
                 pass
             else:
@@ -306,20 +338,6 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
             print(f"Mpipe initialised.\nloaded data from: {self.data_file}\n")
             self.descr_data(self.data)
         
-        # ext_ind = self.data_file.rfind(".")
-        # data_ext = self.data_file[ext_ind:]
-        # if data_ext in self.compatible_ftypes.keys():
-        #     self.data = self.compatible_ftypes[data_ext](self.data_file)
-        #     if self.safe_run:
-        #         if type(self.data) != type(pd.DataFrame):
-        #             self.data = pd.DataFrame(self.data)
-        #         self.data.dropna()
-        
-        # if subject_ID is None:
-        #     self.subj_id = [x for x in range(1, self.data.shape[0])]
-        # else:
-        #     self.subj_id = pd.read_csv(os.path.join(self.root, subject_ID)).iloc[:,0]
-
         
     def save(self, obj, fname=None):
         if type(obj) != pd.DataFrame:
@@ -327,7 +345,7 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
         if fname is not None:
             self.custom_fname = fname
         fname = f"{self.custom_fname}{self.steps_taken}.csv"
-        path = os.path.join(self.output, fname)
+        path = self.output / fname
 
         obj.to_csv(path, index=False)
         if self.verbose:
@@ -360,5 +378,7 @@ class Mpipe(M_embed, M_dim_reduce, M_cluster, base):
 
 
 if __name__ == "__main__":
+    # testing perposes 
     root = "D:\\Dropbox\\2. Cognitive science\\Music evoked autobiographical memories\\"
     pipe = Mpipe(root, r"data\SBERT\SBERT-L6-v2_embed.csv", "\\data\\SBERT\\")
+
