@@ -12,17 +12,18 @@ The Jupyter notebooks (Analysis.ipynb and Classification.ipynb) demonstrate how 
 
 # Getting Started
 
-PrerequisitesBefore you begin, ensure you have Python installed. It's highly recommended to work within a virtual environment to manage dependencies. You can find a helpful tutorial on creating virtual environments here: https://docs.python.org/3/library/venv.html.
+Prerequisites: Before you begin, ensure you have Python installed. It's highly recommended to work within a virtual environment to manage dependencies. You can find a helpful tutorial on creating virtual environments here: https://docs.python.org/3/library/venv.html.
 
 # Install the required packages:
+~~~
 pip install pandas numpy umap-learn sentence-transformers scikit-learn scikit-fuzzy matplotlib
-
+~~~
 Ensure your data files are placed in the appropriate data/ subdirectory.
 
 # Usage
 The core of this project is the M_Pipeline object, which facilitates a step-by-step text analysis workflow. Below is a basic example of how to use it.
 
-First, download M_pipeline.py and any desired scripts. Ensure they are all in the same directoy (folder).
+First, download M_pipeline.py and any desired notebooks. Ensure they are all in the same directoy (folder).
 ~~~
 import sys
 import pandas as pd
