@@ -1,5 +1,6 @@
 Contact: Felix Noble - felix.noble@live.co.uk | Repositories: https://github.com/Felix-Noble | Project Updates: https://www.linkedin.com/in/felix-noble-6901b117b/
-# Textual Data Analysis Pipeline
+# word-embeddings-analysis-tutorial-pipeline
+
 This project provides an accessible, high-level tool for analyzing textual data, ideal for researchers and students new to Python. It centers around a flexible pipeline (M_Pipeline.py) for analyzing written natural language (NL) through three main steps:
 
 Embedding: Converts text into numerical vectors using models like Sentence-BERT (SBERT).
